@@ -1,39 +1,91 @@
-# DataUri
+# URI::Data
 
-TODO: Delete this and the text below, and describe your gem
+<!--[![Gem Version](https://badge.fury.io/rb/data_uri.svg)](https://rubygems.org/gems/data_uri)-->
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/data_uri`. To experiment with that code, run `bin/console` for an interactive prompt.
+`data_uri` extends Ruby’s built-in `URI` module with support for [`data:` URIs](https://datatracker.ietf.org/doc/html/rfc2397), allowing you to parse, build, and encode inline data resources easily.
+
+---
+
+## Features
+
+- Full support for `data:` URIs per RFC 2397
+- Automatic parsing of media type, charset, and parameters
+- Base64 and URL-encoded data support
+- Easy `build_from` helper for creating data URIs
+
+---
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+Add this line to your Gemfile:
 
-Install the gem and add to the application's Gemfile by executing:
+```ruby
+gem 'data_uri'
+Or install it directly:
 
-```bash
-bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
-```
-
-If bundler is not being used to manage dependencies, install the gem by executing:
-
-```bash
-gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+gem install data_uri
 ```
 
 ## Usage
 
-TODO: Write usage instructions here
+### Parsing a data URI
+
+```ruby
+require 'uri'
+require 'data_uri' # load the extension
+
+uri = URI.parse("data:text/plain;charset=UTF-8,Hello%20world")
+
+puts uri.class         # => URI::Data
+puts uri.content_type  # => "text/plain"
+puts uri.charset       # => "UTF-8"
+puts uri.data          # => "Hello world"
+```
+
+### Building a data URI
+```ruby
+uri = URI::Data.build_from(
+  data: "Hello μ",
+  content_type: "text/plain",
+  charset: "utf-8"
+)
+
+puts uri.to_s # => data:text/plain;charset=utf-8,Hello+%CE%BC
+```
+### Base64 Encoding
+```ruby
+uri = URI::Data.build_from(
+  data: File.binread("image.png"),
+  content_type: "image/png",
+  base64: true
+)
+
+puts uri.to_s # => data:image/png;base64,...
+```
+## API Reference
+
+### Instance Methods
+- `#content_type` → media type (e.g., "image/png")
+- `#charset` → declared charset, default: "US-ASCII"
+- `#parameters` → parsed header parameters (as a Hash)
+- `#data` → decoded data as a string or binary
+
+### Class Methods
+
+- `URI::Data.build(opaque)` → build from raw data URI string (excluding data:)
+- `URI::Data.build_from(data:, content_type:, base64:, **params)` → build structured data: URI
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+To run tests:
+```ruby
+bundle install
+bundle exec rake
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+MIT License. See LICENSE for details.
 
-## Contributing
+## Links
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/data_uri.
-
-## License
-
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+- [RFC 2397 – The "data:" URL scheme](https://datatracker.ietf.org/doc/html/rfc2397)
+- [Ruby URI Module](https://ruby-doc.org/3.4.1/stdlibs/uri/URI.html)
